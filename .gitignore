@@ -51,4 +51,10 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
-
+pic-large/*
+pic-long/*
+pic-small/*
+download/*
+static/*
+media/*
+image/*
