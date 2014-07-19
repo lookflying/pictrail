@@ -30,14 +30,15 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
-    'django.contrib.auth',
+#    'django.contrib.admin',
+#    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-		'pictrail',
-		'django_extensions',
+    'pictrail',
+    'django_extensions',
+	'shellng',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -69,10 +70,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'pictraildb',
-		'USER': 'root',
-		'PASSWORD': 'bVqYQB9pJ6Fxd',
-		'HOST': '10.66.105.33',
-		'PORT': '3306',
+        'USER': 'root',
+        'PASSWORD': 'bVqYQB9pJ6Fxd',
+        'HOST': '10.66.105.33',
+        'PORT': '3306',
     }
 }
 
@@ -87,7 +88,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -101,16 +102,23 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
-	        'level': 'DEBUG',
-	        'class': 'logging.FileHandler',
-	        'filename': '/data/www/pictrail/web/debug.log',
-		 },
-	 },
-	 'loggers': {
-	     'django.request': {
-	         'handlers': ['file'],
-	         'level': 'DEBUG',
-	         'propagate': True,
-		 },
-	},
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/data/www/pictrail/web/debug.log',
+         },
+     },
+     'loggers': {
+         'django.request': {
+             'handlers': ['file'],
+             'level': 'DEBUG',
+             'propagate': True,
+         },
+    },
 }
+
+ 
+
+
+PIC_LARGE_DIR = os.path.join(BASE_DIR, "pic-large/")
+PIC_SMALL_DIR = os.path.join(BASE_DIR, "pic-small/")
+PIC_LONG_DIR = os.path.join(BASE_DIR, "pic-long/")

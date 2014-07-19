@@ -16,6 +16,8 @@ class Picture(models.Model):
 	longitude = models.DecimalField(max_digits=10, decimal_places=6)
 	latitude = models.DecimalField(max_digits=10, decimal_places=6)
 
+	def __unicode__(self):
+		return self.time.isoformat() + " @ " + self.location + "(" + self.longitude.to_eng_string() + "," + self.latitude.to_eng_string() + ")"  + " by " + self.user.name 
 
 class Raised(models.Model):
 	user = models.ForeignKey(User)

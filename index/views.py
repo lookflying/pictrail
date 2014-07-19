@@ -8,5 +8,4 @@ def index(request):
     finally:
         file_object.close()
 	return HttpResponse(content)
-
 # Create your views here.

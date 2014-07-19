@@ -10,5 +10,4 @@ urlpatterns = patterns('',
 		
     url(r'^$', include('index.urls')),
     url(r'^interface/', include('pictrail.urls')),
-    url(r'^admin/', include(admin.site.urls)),
 )
