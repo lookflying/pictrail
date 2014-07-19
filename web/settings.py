@@ -122,3 +122,4 @@ LOGGING = {
 PIC_LARGE_DIR = os.path.join(BASE_DIR, "pic-large/")
 PIC_SMALL_DIR = os.path.join(BASE_DIR, "pic-small/")
 PIC_LONG_DIR = os.path.join(BASE_DIR, "pic-long/")
+PIC_SMALL_LEN = 150

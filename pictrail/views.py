@@ -3,6 +3,7 @@ from django.http import HttpResponse
 import json
 from django.http import Http404
 from pictrail import pic_operation
+from django.conf import settings
 
 def interface(request):
 	rst = {}
