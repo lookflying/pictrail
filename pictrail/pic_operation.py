@@ -1,4 +1,4 @@
-from pictrail.models import User, Picture
+from pictrail.models import User, Picture, Raised, Comment
 from django.conf import settings
 from datetime import datetime
 from PIL import Image
@@ -55,7 +55,28 @@ def refresh_pic(longitude, latitude, scale, start_idx, count):
 	return rst
 
 def pic_info(username, pic_idx):
-	pass
+	rst = {}
+	rst['result'] = 0
+	try:
+		pic = Picture.objects.get(id=pic_idx)
+	except Picture.DoesNotExist:
+		return rst
+	rst['username'] = pic.user.name
+	rst['location'] = pic.location
+	rst['time'] = pic.time.__str__()
+	rst['detail'] = pic.detail
+	rst['raiseCount'] = pic.raise_count
+	if len(Raised.objects.filter(user__name=username, pic=pic)) > 0:
+		rst['isRaised'] = 1
+	else:
+		rst['isRaised'] = 0
+	comments = Comment.objects.filter(pic=pic)
+	rst['commentArray'] = []
+	for comment in comments:
+		rst['commentArray'].append({'username': comment.user.name, 'comment': comment.content, 'time': comment.time.__str__()})
+	rst['commentCount'] = len(rst['commentArray'])
+	rst['result'] = 1	
+	return rst
 
 def make_long_pic(count, pic_array):
 	pass

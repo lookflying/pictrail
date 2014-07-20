@@ -17,7 +17,7 @@ class Picture(models.Model):
 	latitude = models.DecimalField(max_digits=10, decimal_places=6)
 
 	def __unicode__(self):
-		return self.time.isoformat() + " @ " + self.location + "(" + self.longitude.to_eng_string() + "," + self.latitude.to_eng_string() + ")"  + " by " + self.user.name 
+		return self.time.__str__() + " @ " + self.location + "(" + self.longitude.to_eng_string() + "," + self.latitude.to_eng_string() + ")"  + " by " + self.user.name 
 
 class Raised(models.Model):
 	user = models.ForeignKey(User)
@@ -32,6 +32,8 @@ class Comment(models.Model):
 	pic = models.ForeignKey(Picture)
 	content = models.CharField(max_length=50)
 	time = models.DateTimeField('Comment time')
+	def __unicode__(self):
+		return self.user.name + " said: " + self.content + " about " + str(self.pic.id) + " @ " + self.time.__str__()
 
 class Suggest(models.Model):
 	user = models.ForeignKey(User)
