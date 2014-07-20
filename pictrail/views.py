@@ -31,6 +31,12 @@ def interface(request):
 					elif json_data['cmd'] == 'picInfo':
 					  if json_data.has_key('username') and json_data.has_key('picIndex'):
 						  rst = pic_operation.pic_info(json_data['username'], json_data['picIndex'])
+					elif json_data['cmd'] == 'refreshMine':
+					   if json_data.has_key('username'):
+						   rst = pic_operation.refresh_mine(json_data['username'])
+					elif json_data['cmd'] == 'refreshCollection':
+						if json_data.has_key('username'):
+							rst = pic_operation.refresh_collection(json_data['username'])
 		return HttpResponse(json.dumps(rst), content_type="application/json")
 	else:
 		raise Http404

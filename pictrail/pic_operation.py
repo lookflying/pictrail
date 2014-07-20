@@ -1,4 +1,4 @@
-from pictrail.models import User, Picture, Raised, Comment
+from pictrail.models import User, Picture, Raised, Comment, Collection
 from django.conf import settings
 from datetime import datetime
 from PIL import Image
@@ -79,12 +79,28 @@ def pic_info(username, pic_idx):
 	return rst
 
 def make_long_pic(count, pic_array):
+	rst = {}
 	pass
 
 def refresh_mine(username):
-	pass
+	rst = {}
+	pics = Picture.objects.filter(user__name=username)
+	rst['picArray'] = []
+	for pic in pics:
+		rst['picArray'].append({'picIndex': str(pic.id), 'time': pic.time.__str__(), 'location': pic.location, 'detail': pic.detail})
+	rst['picCount'] = len(rst['picArray'])
+	rst['result'] = 1
+	return rst
 
 def refresh_collection(username):
-	pass
+	rst = {}
+	collections  = Collection.objects.filter(user__name=username)
+	rst['picArray'] = []
+	for collection in collections:
+		rst['picArray'].append({'pidIndex': collection.pic.id, 'time': collection.pic.time.__str__(), 'location': collection.pic.location, 'username': collection.pic.user.name, 'detail': collection.pic.detail})
+	rst['picCount'] = len(rst['picArray'])
+	rst['result'] = 1
+	return rst
+
 
 
