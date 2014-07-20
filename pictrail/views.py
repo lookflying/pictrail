@@ -22,6 +22,12 @@ def interface(request):
 							photo = request.FILES[f]
 							if pic_operation.publish_pic(json_data['username'], json_data['longitude'], json_data['latitude'], json_data['location'], json_data['detail'], photo):
 								rst['result'] = 1
+			elif 'application/json' == request.META['CONTENT_TYPE']:
+				json_data = json.loads(request.body)
+				if json_data.has_key('cmd'):
+					if json_data['cmd'] == 'refreshPic':
+						if json_data.has_key('longitude') and json_data.has_key('latitude') and json_data.has_key('scale') and json_data.has_key('startIndex') and json_data.has_key('refreshCount'):
+							rst = pic_operation.refresh_pic(json_data['longitude'], json_data['latitude'], json_data['scale'], json_data['startIndex'], json_data['refreshCount'])
 		return HttpResponse(json.dumps(rst), content_type="application/json")
 	else:
 		raise Http404
