@@ -3,6 +3,7 @@ from django.http import HttpResponse
 import json
 from django.http import Http404
 from pictrail import pic_operation
+from pictrail import user_operation
 from django.conf import settings
 
 def interface(request):
@@ -40,6 +41,18 @@ def interface(request):
 					elif json_data['cmd'] == 'makeLongPic':
 						if json_data.has_key('username') and json_data.has_key('picCount') and json_data.has_key('picArray'):
 							rst = pic_operation.make_long_pic(json_data['username'], json_data['picCount'], json_data['picArray'])
+					elif json_data['cmd'] == 'userLogin':
+						rst['result'] = user_operation.userLogin(json_data)
+					elif json_data['cmd'] == 'userRegister':
+						rst['result'] = user_operation.userRegister(json_data)
+					elif json_data['cmd'] == 'sendAdvice':
+						rst['result'] = user_operation.sendAdvice(json_data)
+					elif json_data['cmd'] == 'collectPic':
+						rst['result'] = user_operation.collectPic(json_data)
+					elif json_data['cmd'] == 'raise':
+						rst['result'] = user_operation.raisePic(json_data)
+					elif json_data['cmd'] == 'comment':
+						rst['result'] = user_operation.comment(json_data)
 		return HttpResponse(json.dumps(rst), content_type="application/json")
 	else:
 		raise Http404

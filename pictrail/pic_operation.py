@@ -41,12 +41,15 @@ def publish_pic(username, longitude, latitude, location, detail, photo):
 def refresh_pic(longitude, latitude, scale, start_idx, count):
 	rst = {}
 	rst['result'] = 0
-	try:
-		start_pic = Picture.objects.get(id=start_idx)
-	except Picture.DoesNotExist:
-		return rst
-	pass
-	pics = Picture.objects.filter(time__lt=start_pic.time).order_by('-time')[:count]
+	if start_idx != '0':
+		try:
+			start_pic = Picture.objects.get(id=start_idx)
+			start_time = start_pic.time
+		except Picture.DoesNotExist:
+			return rst
+	else:
+		start_time = datetime.now()
+	pics = Picture.objects.filter(time__lt=start_time).order_by('-time')[:count]
 #TODO geography search
 	rst['picArray'] = []
 	for pic in pics:
