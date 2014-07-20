@@ -93,8 +93,7 @@ def concatenate_pic(pic_id_list, long_pic_id):
 			image_list.append(ori_image)
 		for image in image_list:
 			(width, height) = image.size
-			ratio = width / min_width
-			resized_height = height / ratio
+			resized_height = height * min_width / width
 			resized_image_list.append(image.resize((min_width, resized_height), Image.ANTIALIAS))
 			total_height += resized_height
 		long_image = Image.new("RGB", (min_width, total_height))
@@ -121,8 +120,6 @@ def make_long_pic(username, count, pic_array):
 	try:
 		for item in pic_array:
 			pic_id_list[item['no'] - 1] = item['picIndex']#start from 1	
-			rst['no-list'].append(item['no'])
-			rst['list'].append(item['picIndex'])
 			SelectedPicture.objects.create(pic=Picture.objects.get(id=item['picIndex']), long_pic=long_pic)
 		if concatenate_pic(pic_id_list, long_pic.id):
 			rst['result'] = 1
@@ -130,7 +127,7 @@ def make_long_pic(username, count, pic_array):
 			return rst
 	except Exception, e:
 		if settings.DEBUG:
-			rst['exception'] =  e.__str__()
+			raise e	
 		return rst
 	return rst
 	
