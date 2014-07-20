@@ -29,14 +29,17 @@ def interface(request):
 						if json_data.has_key('longitude') and json_data.has_key('latitude') and json_data.has_key('scale') and json_data.has_key('startIndex') and json_data.has_key('refreshCount'):
 							rst = pic_operation.refresh_pic(json_data['longitude'], json_data['latitude'], json_data['scale'], json_data['startIndex'], json_data['refreshCount'])
 					elif json_data['cmd'] == 'picInfo':
-					  if json_data.has_key('username') and json_data.has_key('picIndex'):
+						if json_data.has_key('username') and json_data.has_key('picIndex'):
 						  rst = pic_operation.pic_info(json_data['username'], json_data['picIndex'])
 					elif json_data['cmd'] == 'refreshMine':
-					   if json_data.has_key('username'):
+						if json_data.has_key('username'):
 						   rst = pic_operation.refresh_mine(json_data['username'])
 					elif json_data['cmd'] == 'refreshCollection':
 						if json_data.has_key('username'):
 							rst = pic_operation.refresh_collection(json_data['username'])
+					elif json_data['cmd'] == 'makeLongPic':
+						if json_data.has_key('username') and json_data.has_key('picCount') and json_data.has_key('picArray'):
+							rst = pic_operation.make_long_pic(json_data['username'], json_data['picCount'], json_data['picArray'])
 		return HttpResponse(json.dumps(rst), content_type="application/json")
 	else:
 		raise Http404

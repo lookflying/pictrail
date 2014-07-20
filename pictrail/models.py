@@ -46,6 +46,6 @@ class LongPicture(models.Model):
 
 class SelectedPicture(models.Model):
 	pic = models.ForeignKey(Picture)
-	longPic = models.ForeignKey(LongPicture)
+	long_pic = models.ForeignKey(LongPicture)
 
 	

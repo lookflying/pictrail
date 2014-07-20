@@ -1,8 +1,9 @@
-from pictrail.models import User, Picture, Raised, Comment, Collection
+from pictrail.models import User, Picture, Raised, Comment, Collection, LongPicture, SelectedPicture
 from django.conf import settings
 from datetime import datetime
 from PIL import Image
 import StringIO
+import sys
 def save_small_pic(pic_id, large_pic):
 	large_file = StringIO.StringIO(large_pic.read())
 	large_image = Image.open(large_file)
@@ -78,10 +79,61 @@ def pic_info(username, pic_idx):
 	rst['result'] = 1	
 	return rst
 
-def make_long_pic(count, pic_array):
-	rst = {}
-	pass
+def concatenate_pic(pic_id_list, long_pic_id):
+	min_width = settings.PIC_LONG_MAX_WIDTH
+	image_list = []
+	resized_image_list = []
+	total_height = 0
+	try:
+		for pic_id in pic_id_list:
+			ori_image = Image.open(settings.PIC_LARGE_DIR + str(pic_id) + ".jpg")
+			(width, height) = ori_image.size
+			if width < min_width:
+				min_width = width;
+			image_list.append(ori_image)
+		for image in image_list:
+			(width, height) = image.size
+			ratio = width / min_width
+			resized_height = height / ratio
+			resized_image_list.append(image.resize((min_width, resized_height), Image.ANTIALIAS))
+			total_height += resized_height
+		long_image = Image.new("RGB", (min_width, total_height))
+		cur_height = 0
+		for resized_image in resized_image_list:
+			long_image.paste(resized_image, (0, cur_height))
+			cur_height += resized_image.size[1]#add height to cur_height
+		long_image.save(settings.PIC_LONG_DIR + str(long_pic_id) + ".jpg")
+		return True 
+	except Exception, e:
+		raise e	
+		return False
 
+
+def make_long_pic(username, count, pic_array):
+	rst = {}
+	rst['result'] = 0
+	try:
+		user = User.objects.get(name=username)
+	except User.DoesNotExist:
+		return rst
+	pic_id_list = range(len(pic_array))
+	long_pic = LongPicture.objects.create(user=user, time=datetime.now())
+	try:
+		for item in pic_array:
+			pic_id_list[item['no'] - 1] = item['picIndex']#start from 1	
+			rst['no-list'].append(item['no'])
+			rst['list'].append(item['picIndex'])
+			SelectedPicture.objects.create(pic=Picture.objects.get(id=item['picIndex']), long_pic=long_pic)
+		if concatenate_pic(pic_id_list, long_pic.id):
+			rst['result'] = 1
+			rst['picIndex'] = long_pic.id
+			return rst
+	except Exception, e:
+		if settings.DEBUG:
+			rst['exception'] =  e.__str__()
+		return rst
+	return rst
+	
 def refresh_mine(username):
 	rst = {}
 	pics = Picture.objects.filter(user__name=username)
