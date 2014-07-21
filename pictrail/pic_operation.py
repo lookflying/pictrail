@@ -4,6 +4,9 @@ from datetime import datetime
 from PIL import Image
 import StringIO
 import sys
+from django.db.models import Q
+from pictrail import geo_calc
+from decimal import *
 def save_small_pic(pic_id, large_pic):
 	large_file = StringIO.StringIO(large_pic.read())
 	large_image = Image.open(large_file)
@@ -49,11 +52,24 @@ def refresh_pic(longitude, latitude, scale, start_idx, count):
 			return rst
 	else:
 		start_time = datetime.now()
-	pics = Picture.objects.filter(time__lt=start_time).order_by('-time')[:count]
-#TODO geography search
+	DISTANCE_PER_DEGREE = 111000.0#only for latitude, use 1 for longitude
+	range = scale / DISTANCE_PER_DEGREE
+#	pics = Picture.objects.filter(Q(longitude__gte=longitude - range) & Q(longitude__lte=longitude + range) & Q(latitude_gte=latitude - range) & Q(latitude_lte=latitude + range) & Q(time__lt=start_time))#.order_by('-time')[:count]
+	pics = Picture.objects.filter(Q(longitude__gte=longitude - 1) & Q(longitude__lte=longitude + 1) & Q(latitude__gte=latitude - range) & Q(latitude__lte=latitude + range) & Q(time__lt=start_time)).order_by('-time')
+		
+#	pics = Picture.objects.filter(time__lt=start_time).order_by('-time')[:count]
+		
 	rst['picArray'] = []
+	pic_added = 0
+	center_loc = (Decimal(longitude), Decimal(latitude))
 	for pic in pics:
-		rst['picArray'].append({'picIndex': pic.id, 'time': pic.time.__str__()})
+		if pic_added < count:
+			pic_loc = (pic.longitude, pic.latitude)
+			if geo_calc.distance(center_loc, pic_loc) <= scale:
+				rst['picArray'].append({'picIndex': pic.id, 'time': pic.time.__str__()})
+				pic_added+=1
+		else:
+			break
 	rst['picCount'] = len(rst['picArray'])
 	rst['result'] = 1
 	return rst
@@ -149,7 +165,7 @@ def refresh_collection(username):
 	collections  = Collection.objects.filter(user__name=username)
 	rst['picArray'] = []
 	for collection in collections:
-		rst['picArray'].append({'pidIndex': collection.pic.id, 'time': collection.pic.time.__str__(), 'location': collection.pic.location, 'username': collection.pic.user.name, 'detail': collection.pic.detail})
+		rst['picArray'].append({'picIndex': collection.pic.id, 'time': collection.pic.time.__str__(), 'location': collection.pic.location, 'username': collection.pic.user.name, 'detail': collection.pic.detail})
 	rst['picCount'] = len(rst['picArray'])
 	rst['result'] = 1
 	return rst
