@@ -26,18 +26,19 @@ def save_small_pic(pic_id, large_pic):
 	pass
 
 
-def publish_pic(username, longitude, latitude, location, detail, photo):
+def publish_pic(username, longitude, latitude, location, detail, photo, time):
 	try:
 		user = User.objects.get(name=username)
 	except User.DoesNotExist:
 		return False
-	pic = Picture.objects.create(user=user, time=datetime.now(), location=location, longitude=longitude, latitude=latitude, detail=detail)
-	with open(settings.PIC_LARGE_DIR + str(pic.id) + ".jpg", 'wb+') as dest:
-		for chunk in photo.chunks():
-			dest.write(chunk)
-		dest.close()
-	photo.seek(0)
-	save_small_pic(pic.id, photo)
+#	pic = Picture.objects.create(user=user, time=time, location=location, longitude=longitude, latitude=latitude, detail=detail)
+#	pic = Picture.objects.create(user=user, time=time, location=location, longitude=longitude, latitude=latitude, detail=detail)
+#	with open(settings.PIC_LARGE_DIR + str(pic.id) + ".jpg", 'wb+') as dest:
+#		for chunk in photo.chunks():
+#			dest.write(chunk)
+#		dest.close()
+#	photo.seek(0)
+#	save_small_pic(pic.id, photo)
 	return True
 
 
@@ -171,4 +172,19 @@ def refresh_collection(username):
 	return rst
 
 
+def manage(request):
+	rst = {}
+    if request.META.has_key('CONTENT_TYPE'):
+        if 'multipart/form-data' in request.META['CONTENT_TYPE']:
+            if request.FILES.has_key('JSON'):
+                json_data = json.loads(request.FILES['JSON'].read())
+                if settings.DEBUG :
+                    rst['json'] = json_data
+                if json_data.has_key('cmd') and json_data['cmd'] == 'publishPic' and json_data.has_key('username') and json_data.has_key('longitude') and json_data.has_key('latitude') and json_data.has_key('location') and json_data.has_key('detail') and json_data.has_key('time'):
+                    if request.FILES.has_key('uploadFile'):
+                        photo = request.FILES['uploadFile']
+                        if pic_operation.publish_pic(json_data['username'], json_data['longitude'], json_data['latitude'], json_data['location'], json_data['detail'], photo, json_data['time']):
+                            rst['result'] = 1
 
+	rst['result'] = 1
+	return rst
