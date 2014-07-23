@@ -125,3 +125,4 @@ PIC_LONG_DIR = os.path.join(BASE_DIR, "pic-long/")
 PIC_SMALL_LEN = 150
 PIC_LARGE_LEN = 1600
 PIC_LONG_MAX_WIDTH = 1600
+PIC_FONT_FILE = os.path.join(BASE_DIR, "DejaVuSans.ttf")

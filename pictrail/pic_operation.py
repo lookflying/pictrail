@@ -2,6 +2,8 @@ from pictrail.models import User, Picture, Raised, Comment, Collection, LongPict
 from django.conf import settings
 from datetime import datetime
 from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
 import StringIO
 import sys
 from django.db.models import Q
@@ -137,6 +139,40 @@ def concatenate_pic(pic_id_list, long_pic_id):
 	except Exception, e:
 		raise e	
 		return False
+def concatenate_pic_with_year(pic_id_list, long_pic_id):
+	min_width = settings.PIC_LONG_MAX_WIDTH
+	image_list = []
+	resized_image_list = []
+	total_height = 0
+	try:
+		for pic_id in pic_id_list:
+			ori_image = Image.open(settings.PIC_LARGE_DIR + str(pic_id) + ".jpg")
+			(width, height) = ori_image.size
+			if width < min_width:
+				min_width = width;
+			year = Picture.objects.get(id=pic_id).time.year
+			image_list.append((ori_image, year))
+		for image, year in image_list:
+			(width, height) = image.size
+			resized_height = height * min_width / width
+			resized_image_list.append((image.resize((min_width, resized_height), Image.ANTIALIAS), year))
+			total_height += resized_height
+		long_image = Image.new("RGB", (min_width, total_height))
+		cur_height = 0
+		draw = ImageDraw.Draw(long_image)
+		for resized_image, year in resized_image_list:
+			long_image.paste(resized_image, (0, cur_height))
+			(r_width, r_height) = resized_image.size
+			font = ImageFont.truetype(settings.PIC_FONT_FILE, min(100, r_height / 2))
+			draw.text((r_width - 300, cur_height + r_height - 120), str(year), (255,255,255), font=font)
+			
+			cur_height += resized_image.size[1]#add height to cur_height
+		long_image.save(settings.PIC_LONG_DIR + str(long_pic_id) + ".jpg")
+		return True 
+	except Exception, e:
+		raise e	
+		return False
+
 
 
 def make_long_pic(username, count, pic_array):
@@ -152,7 +188,8 @@ def make_long_pic(username, count, pic_array):
 		for item in pic_array:
 			pic_id_list[item['no']] = item['picIndex']#start from 0	
 			SelectedPicture.objects.create(pic=Picture.objects.get(id=item['picIndex']), long_pic=long_pic)
-		if concatenate_pic(pic_id_list, long_pic.id):
+#if concatenate_pic(pic_id_list, long_pic.id):
+		if concatenate_pic_with_year(pic_id_list, long_pic.id):
 			rst['result'] = 1
 			rst['picIndex'] = long_pic.id
 			return rst
