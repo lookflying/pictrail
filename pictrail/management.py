@@ -7,6 +7,7 @@ import sys
 from django.db.models import Q
 from pictrail import geo_calc
 from decimal import *
+import json
 def save_small_pic(pic_id, large_pic):
 	large_file = StringIO.StringIO(large_pic.read())
 	large_image = Image.open(large_file)
@@ -14,16 +15,31 @@ def save_small_pic(pic_id, large_pic):
 	s_width = width
 	s_height = height
 	if width > height:
-		ratio = height / settings.PIC_SMALL_LEN
-		s_width = width / ratio
+		s_width = width * settings.PIC_SMALL_LEN / height
 		s_height = settings.PIC_SMALL_LEN
 	else:
-		ratio = width / settings.PIC_SMALL_LEN
-		s_height = height / ratio
+		s_height = height * settings.PIC_SMALL_LEN / width
 		s_width = settings.PIC_SMALL_LEN
 	small_image = large_image.resize((s_width, s_height), Image.ANTIALIAS)
 	small_image.save(settings.PIC_SMALL_DIR + str(pic_id) + ".jpg")
 	pass
+
+def save_large_pic(pic_id, large_pic):
+	large_file = StringIO.StringIO(large_pic.read())
+	large_image = Image.open(large_file)
+	(width, height) = large_image.size
+	s_width = width
+	s_height = height
+	if width > height:
+		s_width = width * settings.PIC_LARGE_LEN / height
+		s_height = settings.PIC_LARGE_LEN
+	else:
+		s_height = height * settings.PIC_LARGE_LEN / width
+		s_width = settings.PIC_LARGE_LEN
+	small_image = large_image.resize((s_width, s_height), Image.ANTIALIAS)
+	small_image.save(settings.PIC_LARGE_DIR + str(pic_id) + ".jpg")
+	pass
+
 
 
 def publish_pic(username, longitude, latitude, location, detail, photo, time):
@@ -31,14 +47,23 @@ def publish_pic(username, longitude, latitude, location, detail, photo, time):
 		user = User.objects.get(name=username)
 	except User.DoesNotExist:
 		return False
+	try:
+		if len(location) > 50:
+			location = location[:50]
+		if len(detail) > 200:
+			detail = detail[:50]
+		pic = Picture.objects.create(user=user, time=datetime.strptime(time, "%d %B %Y"), location=location, longitude=longitude, latitude=latitude, detail=detail)
+	except Exception, e:
+		raise e
 #	pic = Picture.objects.create(user=user, time=time, location=location, longitude=longitude, latitude=latitude, detail=detail)
 #	pic = Picture.objects.create(user=user, time=time, location=location, longitude=longitude, latitude=latitude, detail=detail)
 #	with open(settings.PIC_LARGE_DIR + str(pic.id) + ".jpg", 'wb+') as dest:
 #		for chunk in photo.chunks():
 #			dest.write(chunk)
 #		dest.close()
-#	photo.seek(0)
-#	save_small_pic(pic.id, photo)
+	save_large_pic(pic.id, photo)
+	photo.seek(0)
+	save_small_pic(pic.id, photo)
 	return True
 
 
@@ -177,13 +202,13 @@ def manage(request):
 	rst['result'] = 0
 	if request.META.has_key('CONTENT_TYPE'):
 		if 'multipart/form-data' in request.META['CONTENT_TYPE']:
-			if request.FILES.has_key('JSON'):
-				json_data = json.loads(request.FILES['JSON'].read())
+			if request.REQUEST.has_key('JSON'):
+				json_data = json.loads(request.REQUEST['JSON'])
 				if settings.DEBUG:
 					rst['json'] = json_data
 				if json_data.has_key('cmd') and json_data['cmd'] == 'publishPic' and json_data.has_key('username') and json_data.has_key('longitude') and json_data.has_key('latitude') and json_data.has_key('location') and json_data.has_key('detail') and json_data.has_key('time'):
 					if request.FILES.has_key('uploadFile'):
 						photo = request.FILES['uploadFile']
-						if pic_operation.publish_pic(json_data['username'], json_data['longitude'], json_data['latitude'], json_data['location'], json_data['detail'], photo, json_data['time']):
+						if publish_pic(json_data['username'], json_data['longitude'], json_data['latitude'], json_data['location'], json_data['detail'], photo, json_data['time']):
 							rst['result'] = 1
 	return rst

@@ -14,16 +14,31 @@ def save_small_pic(pic_id, large_pic):
 	s_width = width
 	s_height = height
 	if width > height:
-		ratio = height / settings.PIC_SMALL_LEN
-		s_width = width / ratio
+		s_width = width * settings.PIC_SMALL_LEN / height
 		s_height = settings.PIC_SMALL_LEN
 	else:
-		ratio = width / settings.PIC_SMALL_LEN
-		s_height = height / ratio
+		s_height = height * settings.PIC_SMALL_LEN / width
 		s_width = settings.PIC_SMALL_LEN
 	small_image = large_image.resize((s_width, s_height), Image.ANTIALIAS)
 	small_image.save(settings.PIC_SMALL_DIR + str(pic_id) + ".jpg")
 	pass
+
+def save_large_pic(pic_id, large_pic):
+	large_file = StringIO.StringIO(large_pic.read())
+	large_image = Image.open(large_file)
+	(width, height) = large_image.size
+	s_width = width
+	s_height = height
+	if width > height:
+		s_width = width * settings.PIC_LARGE_LEN / height
+		s_height = settings.PIC_LARGE_LEN
+	else:
+		s_height = height * settings.PIC_LARGE_LEN / width
+		s_width = settings.PIC_LARGE_LEN
+	small_image = large_image.resize((s_width, s_height), Image.ANTIALIAS)
+	small_image.save(settings.PIC_LARGE_DIR + str(pic_id) + ".jpg")
+	pass
+
 
 
 def publish_pic(username, longitude, latitude, location, detail, photo):
@@ -32,10 +47,7 @@ def publish_pic(username, longitude, latitude, location, detail, photo):
 	except User.DoesNotExist:
 		return False
 	pic = Picture.objects.create(user=user, time=datetime.now(), location=location, longitude=longitude, latitude=latitude, detail=detail)
-	with open(settings.PIC_LARGE_DIR + str(pic.id) + ".jpg", 'wb+') as dest:
-		for chunk in photo.chunks():
-			dest.write(chunk)
-		dest.close()
+	save_large_pic(pic.id, photo)
 	photo.seek(0)
 	save_small_pic(pic.id, photo)
 	return True
@@ -53,9 +65,9 @@ def refresh_pic(longitude, latitude, scale, start_idx, count):
 	else:
 		start_time = datetime.now()
 	DISTANCE_PER_DEGREE = 111000.0#only for latitude, use 1 for longitude
-	range = scale / DISTANCE_PER_DEGREE
+	range = Decimal(scale / DISTANCE_PER_DEGREE)
 #	pics = Picture.objects.filter(Q(longitude__gte=longitude - range) & Q(longitude__lte=longitude + range) & Q(latitude_gte=latitude - range) & Q(latitude_lte=latitude + range) & Q(time__lt=start_time))#.order_by('-time')[:count]
-	pics = Picture.objects.filter(Q(longitude__gte=longitude - 1) & Q(longitude__lte=longitude + 1) & Q(latitude__gte=latitude - range) & Q(latitude__lte=latitude + range) & Q(time__lt=start_time)).order_by('-time')
+	pics = Picture.objects.filter(Q(longitude__gte=Decimal(longitude) - Decimal(1)) & Q(longitude__lte=Decimal(longitude) + Decimal(1)) & Q(latitude__gte=Decimal(latitude) - range) & Q(latitude__lte=Decimal(latitude) + range) & Q(time__lt=start_time)).order_by('-time')
 		
 #	pics = Picture.objects.filter(time__lt=start_time).order_by('-time')[:count]
 		
