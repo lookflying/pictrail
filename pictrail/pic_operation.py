@@ -42,7 +42,7 @@ def save_large_pic(pic_id, large_pic):
 	pass
 
 
-
+#method to publish pic
 def publish_pic(username, longitude, latitude, location, detail, photo):
 	try:
 		user = User.objects.get(name=username)
@@ -54,7 +54,7 @@ def publish_pic(username, longitude, latitude, location, detail, photo):
 	save_small_pic(pic.id, photo)
 	return True
 
-
+#method to response refresh pic request
 def refresh_pic(longitude, latitude, scale, start_idx, count):
 	rst = {}
 	rst['result'] = 0
@@ -88,6 +88,7 @@ def refresh_pic(longitude, latitude, scale, start_idx, count):
 	rst['result'] = 1
 	return rst
 
+#method to respone pic info request
 def pic_info(username, pic_idx):
 	rst = {}
 	rst['result'] = 0
@@ -139,6 +140,7 @@ def concatenate_pic(pic_id_list, long_pic_id):
 	except Exception, e:
 		raise e	
 		return False
+
 def concatenate_pic_with_year(pic_id_list, long_pic_id):
 	min_width = settings.PIC_LONG_MAX_WIDTH
 	image_list = []
@@ -174,7 +176,7 @@ def concatenate_pic_with_year(pic_id_list, long_pic_id):
 		return False
 
 
-
+#methods to response make long pic request
 def make_long_pic(username, count, pic_array):
 	rst = {}
 	rst['result'] = 0
@@ -209,6 +211,7 @@ def refresh_mine(username):
 	rst['result'] = 1
 	return rst
 
+#methods to response refresh collection request
 def refresh_collection(username):
 	rst = {}
 	collections  = Collection.objects.filter(user__name=username)

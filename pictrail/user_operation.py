@@ -1,20 +1,13 @@
 #-*- coding: UTF-8 -*-
-from django.http import HttpResponse
 import json
-from django.http import Http404
 import time
-from django.utils import timezone
-
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
+from django.utils import timezone
+from django.http import HttpResponse, Http404
+from django.core.exceptions import ObjectDoesNotExist
+from pictrail.models import User, Suggest, Raised, Comment, Collection, Picture
 
-from pictrail.models import User
-from pictrail.models import Suggest
-from pictrail.models import Raised
-from pictrail.models import Comment
-from pictrail.models import Collection
-from pictrail.models import Picture
-
+#method for user logging in operation. 
 def userLogin(json_data):
     if json_data.has_key('username') and json_data.has_key('password'):
         user_name = json_data['username']
@@ -30,6 +23,7 @@ def userLogin(json_data):
     except ObjectDoesNotExist:
         return 0
 
+#method for user register
 def userRegister(json_data):
     if json_data.has_key('username') and json_data.has_key('password'):
         user_name = json_data['username']
@@ -44,6 +38,7 @@ def userRegister(json_data):
         new_user.save()
         return 1
 
+#method for making advice 
 def sendAdvice(json_data):
     if json_data.has_key('username') and json_data.has_key('advice'):
         user_name = json_data['username']
@@ -57,8 +52,9 @@ def sendAdvice(json_data):
     cur_time = timezone.now()
     new_suggest = Suggest(user=cur_user, content=advice, time=cur_time)
     new_suggest.save()
-    return 1
+    return 
 
+#collect pictures. If action == 0, decollect. Else, collect.
 def collectPic(json_data):
     if json_data.has_key('username') and json_data.has_key('picIndex') and json_data.has_key('action'):
         user_name = json_data['username']
@@ -89,7 +85,7 @@ def collectPic(json_data):
     else:
         return 0
 
-#raise in the document
+#Raise a picture. 
 def raisePic(json_data):
     if json_data.has_key('username') and json_data.has_key('picIndex') and json_data.has_key('action'):
         user_name = json_data['username']
@@ -124,6 +120,7 @@ def raisePic(json_data):
     else:
         return 0
 
+#make comments to a certain picture. 
 def comment(json_data):
     if json_data.has_key('username') and json_data.has_key('picIndex') and json_data.has_key('comment'):
         user_name = json_data['username']

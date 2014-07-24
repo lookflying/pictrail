@@ -7,6 +7,7 @@ from pictrail import user_operation
 from django.conf import settings
 from pictrail import management
 
+#Category the request into different cases based on the content-type and content in cmd.
 def interface(request):
     rst = {}
     if request.method == 'GET':
